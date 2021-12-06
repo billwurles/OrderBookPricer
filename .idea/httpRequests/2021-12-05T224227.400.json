@@ -1,0 +1,6 @@
+{
+  "timestamp": "2021-12-05T22:42:27.857+00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "path": "/orderbook/reduce"
+}

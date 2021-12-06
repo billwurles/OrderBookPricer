@@ -1,0 +1,16 @@
+GET http://localhost:8081/orderbook/all
+
+<> 2021-12-05T224228.500.json
+
+###
+
+GET http://orderbook
+
+###
+
+POST http://localhost:8081/orderbook/reduce
+
+<> 2021-12-05T224227.400.json
+
+###
+
