@@ -3,7 +3,6 @@ package burl.es.orderbook.model;
 import burl.es.orderbook.model.engine.OrderBook;
 import burl.es.orderbook.model.exceptions.OrderNotFoundException;
 import burl.es.orderbook.model.exceptions.OrderParseException;
-import burl.es.orderbook.model.exceptions.OrderTimestampMalformedException;
 import burl.es.orderbook.model.order.*;
 import lombok.AccessLevel;
 import lombok.NonNull;
@@ -33,7 +32,7 @@ public class OrderBookController {
 	private static final OrderBook book = new OrderBook();
 
 	@PostMapping(path = "/order", produces = "application/json")
-	public Order addOrder(@RequestBody OrderSnapshot snap) throws OrderNotFoundException {
+	public Order addOrder(@RequestBody OrderSnapshot snap) throws OrderNotFoundException { //TODO: input validation
 		book.addOrder(new Order(parseOrderTimeStamp(snap.getTimestamp()), snap.getOrderId(), snap.getSide(), new BigDecimal(snap.getPrice()), new BigDecimal(snap.getSize())));
 		return book.getOrderById(snap.getOrderId());
 	}
@@ -63,9 +62,8 @@ public class OrderBookController {
 		return book.getBuyOrders();
 	}
 
-
-	public long maxHashTime = 0;
-	public long maxBubbleTime = 0;
+//	public long maxHashTime = 0;
+//	public long maxBubbleTime = 0;
 
 	@PostMapping(path = "/reduce", produces = "application/json")
 	public Order reduceOrder(@RequestBody ReduceSnapshot snap) throws OrderParseException, OrderNotFoundException {
@@ -96,14 +94,14 @@ public class OrderBookController {
 		return book.getOrderById(id);
 	}
 
-	private static ZonedDateTime parseOrderTimeStamp(long millisSinceMidnight) throws OrderTimestampMalformedException {
+	private static ZonedDateTime parseOrderTimeStamp(long millisSinceMidnight) {
 		try {
 			LocalDateTime todayMidnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
 			ZonedDateTime zdt = todayMidnight.atZone(ZoneId.of("Europe/London"));
 			long midnightEpoch = zdt.toInstant().toEpochMilli();
 			return ZonedDateTime.ofInstant(Instant.ofEpochMilli(midnightEpoch + millisSinceMidnight), ZoneId.of("Europe/London"));
 		} catch(Exception e){
-			throw new OrderTimestampMalformedException("Timestamp '"+millisSinceMidnight+"' is invalid");
+			throw new OrderParseException("Timestamp '"+millisSinceMidnight+"' is invalid");
 		}
 	}
 }

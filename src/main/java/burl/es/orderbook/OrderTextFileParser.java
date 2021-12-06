@@ -3,15 +3,12 @@ package burl.es.orderbook;
 import burl.es.orderbook.model.OrderBookController;
 import burl.es.orderbook.model.exceptions.OrderNotFoundException;
 import burl.es.orderbook.model.exceptions.OrderParseException;
-import burl.es.orderbook.model.exceptions.OrderTimestampMalformedException;
 import burl.es.orderbook.model.exceptions.UnknownOrderTypeException;
 import burl.es.orderbook.model.order.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.*;
 import java.util.Scanner;
 
 @Slf4j
@@ -34,7 +31,7 @@ public class OrderTextFileParser {
     public static void main(String[] args) throws IOException, OrderParseException {
         readOrdersFromFile();
 //        addTestOrders();
-        log.debug("getOrderById max execution time \t hash: {}ns \tbinary: {}ns",controller.maxHashTime ,controller.maxBubbleTime);
+//        log.debug("getOrderById max execution time \t hash: {}ns \tbinary: {}ns",controller.maxHashTime ,controller.maxBubbleTime);
 //		try {
 //		} catch (IOException e) {
 //			e.printStackTrace();

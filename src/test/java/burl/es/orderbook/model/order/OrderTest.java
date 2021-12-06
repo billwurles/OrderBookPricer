@@ -58,12 +58,6 @@ class OrderTest {
 
         @Test
     void fill() {
-            sell10.fill(sell10);
-            assert sell10.getConsumedOrders().isEmpty();
-            buy10.fill(sell10);
-            assert sell10.getConsumedOrders().isEmpty();
-            assert buy10.getConsumedOrders().isEmpty();
-
 //        for(int i=0; i < buy1.length; i++){
 //        assert sell10.getFillRemainder().compareTo(TEN.subtract(new BigDecimal(i))) == 0;
 //        assert buy10.getFillRemainder().compareTo(TEN.subtract(new BigDecimal(i))) == 0;

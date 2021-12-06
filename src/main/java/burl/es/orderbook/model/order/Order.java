@@ -15,9 +15,9 @@ import java.util.ArrayList;
 @Getter
 //@RequiredArgsConstructor
 @EqualsAndHashCode
-@FieldDefaults(level = AccessLevel.PROTECTED)
+//@FieldDefaults(level = AccessLevel.PUBLIC)
 @Slf4j
-public class Order {
+public class Order implements Cloneable {
 
 	@NonNull
 	final ZonedDateTime timestamp;
@@ -54,23 +54,9 @@ public class Order {
 		completeFill(order);
 	}
 
-//	public void reduceOrder(Reduce reduce){
-//		if(!isFilled()){
-//			BigDecimal remainder = getFillRemainder();
-//			if(reduce.getSize().compareTo(remainder) > -1){
-//				log.debug("Reduce size is larger or equal to fill remainder, order is cancelled");
-//				size  = fill;
-//			} else {
-//				log.debug("Reduce size is smaller than remainder, reducing by {}",reduce.getSize());
-//				size = size.subtract(reduce.getSize());
-//			}
-//			consumedOrders.add(reduce);
-//		}
-//	}
-
 	protected void isOrderValid(Order order){
 		if(isFilled() || order.isFilled()){
-			throw new IllegalOrderException("Order is filled");
+			throw new IllegalOrderException(String.format("Order is filled: \n%s\n%s", this, order));
 		} else if(consumedOrders.contains(order) || order.getConsumedOrders().contains(this)){
 			throw new IllegalOrderException("Order is consumed");
 		} else if(order == this) {
@@ -126,5 +112,14 @@ public class Order {
 		if(size.compareTo(BigDecimal.ZERO) < 1)
 			return new BigDecimal(100L);
 		return fill.divide(size, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100L));
+	}
+
+	public Order copy(){
+		try {
+			return (Order) this.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
