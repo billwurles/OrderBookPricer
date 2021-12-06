@@ -1,5 +1,6 @@
 package burl.es.orderbook.model.order;
 
+import burl.es.orderbook.model.exceptions.IllegalOrderException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,25 @@ class OrderTest {
             sell1[i] = new Order(ZonedDateTime.now(), "a"+i, Side.SELL, ONE, ONE);
             buy1[i] = new Order(ZonedDateTime.now(), "b"+i, Side.BUY, ONE, ONE);
         }
+    }
+
+    @Test
+    void exceptionTests() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Order(NOW,"a",Side.SELL, new BigDecimal("-1"),ONE);
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Order(NOW,"a",Side.SELL, ZERO, new BigDecimal("-1"));
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Order(NOW,"a",Side.SELL, ZERO, ZERO);
+        });
+        assertThrows(IllegalOrderException.class, () -> {
+            sell10.fill(sell10);
+        });
+        assertThrows(IllegalOrderException.class, () -> {
+            buy10.fill(buy10);
+        });
 
     }
 

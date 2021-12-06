@@ -60,6 +60,7 @@ public class OrderBook {
 		ordersHash = new HashMap<>();
 		//TODO: maybe just use hashset or arraylist? at least implement new comparator for visual purposes
 	}
+
 // Insertion to book execution time 	 map: 198ns 	list: 130ns	 set: 172ns
 	public String addOrder(Order order){
 		long startTime = System.nanoTime();
@@ -86,16 +87,10 @@ public class OrderBook {
 		return checkForFills();
 	}
 
-	public String reduce(Reduce reduce){
-		try {
-			Order order = getOrderByReduce(reduce);
-//			allOrders.add(reduce);
-			reduce.fill(order);
-//			order.reduceOrder(reduce); //
-			return "";
-		}  catch (OrderNotFoundException e ){
-			return "Order not found, id'"+reduce.getOrderId()+"'";
-		}
+	public Order reduce(Reduce reduce) throws OrderNotFoundException {
+		Order order = getOrderById(reduce.getOrderId());
+		reduce.fill(order);
+		return order;
 	}
 
 	public String checkForFills() { //TODO: run this on separate thread to insertions
@@ -155,27 +150,29 @@ public class OrderBook {
 			hash: 23457ns
 			binary search: 4699574ns
 	//Max individual times: */
-	public Order getOrderByHash(String orderId){
-		return ordersHash.get(orderId);
+	public Order getOrderById(String orderId) throws OrderNotFoundException {
+		Order order = ordersHash.get(orderId);
+		if(order == null) throw new OrderNotFoundException(orderId);
+		return order;
 	}
 
-	private Order getOrderByReduce(Reduce reduce) throws OrderNotFoundException {
-		int i = Collections.binarySearch(orders,
-				reduce,
-				new Comparator<Order>() {
-					@Override
-					public int compare(Order o1, Order o2) {
-						return o1.getOrderId().compareTo(o2.getOrderId());
-					}
-				});
-		if(i < 0) throw new OrderNotFoundException(reduce.getOrderId());
-		return orders.get(i);
-	}
-
-	public Order getOrderById(String id) throws OrderNotFoundException {
-		log.debug("Getting order for ID '{}'",id);
-		return getOrderByReduce(new Reduce(ZonedDateTime.now(), "", id, BigDecimal.ZERO)); //TODO: need an id generator
-	}
+//	private Order getOrderByReduce(Reduce reduce) throws OrderNotFoundException {
+//		int i = Collections.binarySearch(orders,
+//				reduce,
+//				new Comparator<Order>() {
+//					@Override
+//					public int compare(Order o1, Order o2) {
+//						return o1.getOrderId().compareTo(o2.getOrderId());
+//					}
+//				});
+//		if(i < 0) throw new OrderNotFoundException(reduce.getOrderId());
+//		return orders.get(i);
+//	}
+//
+//	public Order getOrderById(String id) throws OrderNotFoundException {
+//		log.debug("Getting order for ID '{}'",id);
+//		return return getOrderByReduce(new Reduce(ZonedDateTime.now(), "", id, BigDecimal.ZERO)); //TODO: need an id generator
+//	}
 
 	public SortedSet<Order> getFilledOrders() {
 		return filledOrders;

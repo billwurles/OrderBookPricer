@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 public class OrderComparator implements Comparator<Order> {
 
-    @Override
+    @Override //TODO: genericise so it's usable for all cases - no timestamp comparison when doing tailset etc  - do profiling to ensure that's not slower than custom comparators though
     public int compare(Order o1, Order o2) {
         if(o1.getTimestamp().isEqual(o2.getTimestamp())) {
             int priceComparison = o1.getPrice().compareTo(o2.getPrice());

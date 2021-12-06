@@ -1,5 +1,6 @@
-package burl.es.orderbook.model;
+package burl.es.orderbook;
 
+import burl.es.orderbook.model.OrderBookController;
 import burl.es.orderbook.model.exceptions.OrderNotFoundException;
 import burl.es.orderbook.model.exceptions.OrderParseException;
 import burl.es.orderbook.model.exceptions.OrderTimestampMalformedException;

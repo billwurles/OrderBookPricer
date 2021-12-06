@@ -1,5 +1,6 @@
 package burl.es.orderbook.model.order;
 
+import burl.es.orderbook.model.exceptions.IllegalOrderException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -49,9 +50,8 @@ public class Order {
 	}
 
 	public void fill(Order order) {
-		if(isOrderValid(order))
-			if(canBuyBeFilled(order))
-				completeFill(order);
+		canBuyBeFilled(order);
+		completeFill(order);
 	}
 
 //	public void reduceOrder(Reduce reduce){
@@ -68,42 +68,25 @@ public class Order {
 //		}
 //	}
 
-	protected boolean isOrderValid(Order order){
+	protected void isOrderValid(Order order){
 		if(isFilled() || order.isFilled()){
-			log.info("Can't Fill {} + {} - Already filled", orderId, order.orderId);
-			return false;
+			throw new IllegalOrderException("Order is filled");
 		} else if(consumedOrders.contains(order) || order.getConsumedOrders().contains(this)){
-			log.info("Can't Fill {} - Already consumed", order.orderId);
-			return false;
+			throw new IllegalOrderException("Order is consumed");
 		} else if(order == this) {
-			log.warn("Order cannot fill itself");
-			return false;
+			throw new IllegalOrderException("Order cannot fill itself");
 		}
-//		else if(this.getPrice().compareTo(BigDecimal.ZERO) < 0 || order.getPrice().compareTo(BigDecimal.ZERO) < 0){
-//			log.warn("Order cannot have negative price");
-//			return false;
-//		} else if(this.getSize().compareTo(BigDecimal.ZERO) < 1 || order.getSize().compareTo(BigDecimal.ZERO) < 1){
-//			log.warn("Order cannot have negative or zero size");
-//			return false;
-//		}
-		return true;
 	}
 
-	private boolean canBuyBeFilled(Order order) {
-		if(isFilled() || consumedOrders.contains(order)){
-			log.info("Can't Fill {} + {} - Already filled", orderId, order.orderId);
-			return false;
-		} else if(side != Side.SELL){
-			log.warn("Only sells can fill");
-			return false;
+	private void canBuyBeFilled(Order order) {
+		isOrderValid(order);
+		if(side != Side.SELL){
+			throw new IllegalOrderException("Only sells can fill");
 		} else if(order.getSide() != Side.BUY){
-			log.warn("Only buys can be filled");
-			return false;
+			throw new IllegalOrderException("Only buys can be filled");
 		} else if(price.compareTo(order.price) > 0){
-			log.info("{} - {} price too high {} < {}", orderId, order.orderId, price, order.price);
-			return false; // Price too high / low
+			throw new IllegalOrderException(String.format("{} - {} price too high {} < {}", orderId, order.orderId, price, order.price));
 		}
-		return true;
 	}
 
 	private void completeFill(Order order){
