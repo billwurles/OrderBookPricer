@@ -1,13 +1,14 @@
 package burl.es.orderbook.model.order;
 
 import burl.es.orderbook.model.exceptions.IllegalOrderException;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @Slf4j
 public class Reduce extends BaseOrder {
 	@NonNull
@@ -37,7 +38,9 @@ public class Reduce extends BaseOrder {
 	}
 
 	private void isReduceValid(@NonNull BaseOrder order) {
-		if(order.getSide() == Side.REDUCE){
+		if(filled){
+			throw new IllegalOrderException("Reduce already filled");
+		} else if(order.getSide() == Side.REDUCE){
 			throw new IllegalOrderException("Cannot reduce a reduce");
 		}
 	}

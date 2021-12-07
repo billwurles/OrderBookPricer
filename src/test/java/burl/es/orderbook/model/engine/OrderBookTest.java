@@ -1,18 +1,15 @@
 package burl.es.orderbook.model.engine;
 
-import burl.es.orderbook.model.OrderBookController;
 import burl.es.orderbook.model.exceptions.OrderNotFoundException;
 import burl.es.orderbook.model.order.Order;
 import burl.es.orderbook.model.order.Reduce;
 import burl.es.orderbook.model.order.Side;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.SortedSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,25 +27,6 @@ class OrderBookTest {
     static BigDecimal ONE = BigDecimal.ONE;
     static BigDecimal TEN = BigDecimal.TEN;
     static BigDecimal ONE_HUNDRED = new BigDecimal("100.00");
-    static int LEN = 10;
-
-    @BeforeEach
-    void setUp() {
-        book = new OrderBook();
-//        sell10 = new Order(NOW, "s", Side.SELL, ONE, TEN);
-//        buy10 = new Order(NOW, "b", Side.BUY, ONE, TEN);
-//        sell1 = new Order[LEN];
-//        buy1 = new Order[LEN];
-//        altSell1 = new Order[LEN];
-//        altBuy1 = new Order[LEN];
-//        for(int i = 0; i < LEN; i++) {
-//            sell1[i] = new Order(ZonedDateTime.now(), "s" + i, Side.SELL, new BigDecimal(i+1), ONE);
-//            buy1[i] = new Order(ZonedDateTime.now(), "b" + i, Side.BUY, new BigDecimal(i+1), ONE);
-//            int r = LEN - i;
-//            altSell1[i] = new Order(ZonedDateTime.now(), "s" + i, Side.SELL, new BigDecimal(r), ONE);
-//            altBuy1[i] = new Order(ZonedDateTime.now(), "b" + i, Side.BUY, new BigDecimal(r), ONE);
-//        }
-    }
 
     private void setUpFor(int len, int price, int size){
         setUpFor(len, price, size,false,false, true);
@@ -93,7 +71,6 @@ class OrderBookTest {
             assert buy1[i].getFillPercentage().compareTo(ZERO) == 0;
             assert !sell10.isFilled();
             assert !buy10.isFilled();
-            log.debug("getFillPercentage s:{} b{}:{}",sell10.getFillPercentage(), i, buy1[i].getFillPercentage());
         }
         b1.addOrder(sell10);
         b2.addOrder(buy10);
@@ -146,13 +123,10 @@ class OrderBookTest {
             b1.addOrder(buy1[i]);
             b2.addOrder(sell1[i]);
 
-            log.debug("{}\n{}\n{}\n{}\n{}",i,sell10,buy10,sell1[i],buy1[i]);
-
             assert sell1[i].getFillPercentage().compareTo(ONE_HUNDRED) == 0;
             assert buy1[i].getFillPercentage().compareTo(ONE_HUNDRED) == 0;
             assert !sell10.isFilled();
             assert !buy10.isFilled();
-            log.debug("getFillPercentage s:{} b{}:{}",sell10.getFillPercentage(), i, buy1[i].getFillPercentage());
         }
         Reduce rs1 = new Reduce(NOW, "rs1","s",new BigDecimal("1.00"));
         Reduce rb1 = new Reduce(NOW, "rb1","b",new BigDecimal("1.00"));
@@ -214,51 +188,11 @@ class OrderBookTest {
             book.addOrder(sell1[i]); // adding high sells and low buys first so all the orders fill immediately
         }
         for(int i = 0; i < len; i++){
-//            log.debug("{}\n{}\n{}",i,sell1[i],buy1[i]);
             assert sell1[i].getFillPercentage().compareTo(ONE_HUNDRED) ==  0;
             assert buy1[i].getFillPercentage().compareTo(ONE_HUNDRED) ==  0;
             int cost = (len - i) * price;
             assert sell1[i].getCost().compareTo(new BigDecimal(cost)) ==  0;
         }
-    }
-
-    @Test
-    void reduce() {
-        int len = 10, price = 10,size = 10;
-        setUpFor(len,price,size);
-        OrderBook b1 = new OrderBook();
-        OrderBook b2 = new OrderBook();
-        sell10 = new Order(NOW, "s", Side.SELL, new BigDecimal(price), new BigDecimal("10.00"));
-        buy10 = new Order(NOW, "b", Side.BUY, new BigDecimal(price), new BigDecimal("10.00"));
-        for(int i=0; i<len;i++){
-            b1.addOrder(sell1[i]);
-            b2.addOrder(buy1[i]);
-        }
-        Reduce rs1 = new Reduce(NOW, "rs1","s3",new BigDecimal("1.00"));
-        Reduce rb1 = new Reduce(NOW, "rb1","b3",new BigDecimal("1.00"));
-        try {
-            b1.reduce(rs1);
-            b2.reduce(rb1);
-        } catch (OrderNotFoundException e) {
-            fail();
-        }
-        assert !sell10.isFilled();
-        assert !buy10.isFilled();
-//        assert sell10.getFill().compareTo(eleven) == 0;
-//        assert buy10.getFill().compareTo(eleven) == 0;
-//        assert sell10.getSize().compareTo(eleven) == 0;
-//        assert buy10.getSize().compareTo(eleven) == 0;
-        assert rs1.isFilled();
-        assert rb1.isFilled();
-        try {
-            b1.reduce(rs1); // try adding same reduce twice, should do nothing
-            b2.reduce(rb1);
-        } catch (OrderNotFoundException e) {
-            fail();
-        }
-        Order s10 = new Order(NOW, "s10", Side.BUY, new BigDecimal(price), new BigDecimal("10.00"));
-        Order b10 = new Order(NOW, "b10", Side.BUY, new BigDecimal(price), new BigDecimal("10.00"));
-
     }
 
     @Test
@@ -293,7 +227,6 @@ class OrderBookTest {
             book.addOrder(sell1[i]);
         }
         for(int i=0; i<len;i++){
-//            log.debug("{}:\n{}\n{}",i,buy1[i],sell1[i]);
             if(i<3){
                 try {
                     assert book.getOrderById(buy1[i].getOrderId()) == buy1[i]; // Will get unfilled orders
@@ -330,7 +263,6 @@ class OrderBookTest {
         }
         ArrayList<Order> orders = book.getFilledOrders();
         for(int i=0; i<len;i++){
-//            log.debug("{}:\n{}\n{}",i,buy1[i],sell1[i]);
             if(i<2){
                 assert !orders.contains(buy1[i]); // Will not contain unfilled orders
                 assert !orders.contains(sell1[i]);
@@ -354,7 +286,6 @@ class OrderBookTest {
         }
         ArrayList<Order> orders = book.getOpenOrders();
         for(int i=0; i<len;i++){
-//            log.debug("{}:\n{}\n{}",i,buy1[i],sell1[i]);
             if(i<2){
                 assert orders.contains(buy1[i]); // Will contain unfilled orders
                 assert orders.contains(sell1[i]);
@@ -380,11 +311,9 @@ class OrderBookTest {
         for(int i=0; i<len;i++){
             assert !orders.contains(buy1[i]); // Will not contain any buy orders
             if(i<2){
-                assert orders.contains(sell1[i]);
-            } else if(i < 8){
-                assert !orders.contains(sell1[i]);
+                assert orders.contains(sell1[i]); // Will contain unfilled sells
             } else {
-                assert !orders.contains(sell1[i]);
+                assert !orders.contains(sell1[i]); // Will not contain filled buys
             }
         }
     }
@@ -399,13 +328,11 @@ class OrderBookTest {
         }
         ArrayList<Order> orders = book.getBuyOrders();
         for(int i=0; i<len;i++){
-            assert !orders.contains(sell1[i]); // Will not contain any buy orders
+            assert !orders.contains(sell1[i]); // Will not contain any sell orders
             if(i<2){
-                assert orders.contains(buy1[i]);
-            } else if(i > 1 && i < 8){
-                assert !orders.contains(buy1[i]);
+                assert orders.contains(buy1[i]); // Will contain unfilled buys
             } else {
-                assert !orders.contains(buy1[i]);
+                assert !orders.contains(buy1[i]); // Will not contain filled buys
             }
         }
     }

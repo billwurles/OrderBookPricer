@@ -10,11 +10,9 @@ import java.math.RoundingMode;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
-@ToString
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @Getter
-//@RequiredArgsConstructor
-@EqualsAndHashCode
-//@FieldDefaults(level = AccessLevel.PUBLIC)
 @Slf4j
 public class Order extends BaseOrder {
 
@@ -35,7 +33,7 @@ public class Order extends BaseOrder {
 
 	public void fill(@NonNull Order order) {
 		isOrderValid(order);
-		if(price.compareTo(order.price) < 0){
+		if(price.compareTo(order.price) <= 0){
 			completeFill(order);
 		} else throw new IllegalOrderException(String.format("%s - %s price too high %s < %s", orderId, order.orderId, price, order.price));
 	}

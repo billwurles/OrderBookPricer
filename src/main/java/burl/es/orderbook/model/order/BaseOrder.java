@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 @RequiredArgsConstructor
 @Getter
+@EqualsAndHashCode
+@ToString
 public abstract class BaseOrder implements Cloneable { //todo: get a better name
 
     @NonNull

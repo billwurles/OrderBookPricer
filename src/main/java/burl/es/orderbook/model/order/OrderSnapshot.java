@@ -12,7 +12,6 @@ public class OrderSnapshot {
 //	price 		The limit price of this order.
 //	size 		The size in shares of this order, when it was initially sent to the market by some stock trader.
 
-	final long timestamp;
 	final String orderId;
 	final Side side;
 	final String price;
