@@ -2,7 +2,6 @@ package burl.es.orderbook.model;
 
 import burl.es.orderbook.model.engine.OrderBook;
 import burl.es.orderbook.model.exceptions.OrderNotFoundException;
-import burl.es.orderbook.model.exceptions.OrderParseException;
 import burl.es.orderbook.model.order.*;
 import lombok.AccessLevel;
 import lombok.NonNull;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.ArrayList;
-import java.util.SortedSet;
 
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -33,8 +31,8 @@ public class OrderBookController {
 
 	@PostMapping(path = "/order", produces = "application/json")
 	public Order addOrder(@RequestBody OrderSnapshot snap) throws OrderNotFoundException { //TODO: input validation - or does spring just do it?
-		book.addOrder(new Order(ZonedDateTime.now(), snap.getOrderId(), snap.getSide(), new BigDecimal(snap.getPrice()), new BigDecimal(snap.getSize())));
-		return book.getOrderById(snap.getOrderId());
+		book.addOrder(new Order(ZonedDateTime.now(), snap.orderId(), snap.side(), new BigDecimal(snap.price()), new BigDecimal(snap.size())));
+		return book.getOrderById(snap.orderId());
 	}
 
 	@GetMapping(path = "/orders", produces = "application/json")
@@ -64,8 +62,8 @@ public class OrderBookController {
 
 	@PostMapping(path = "/reduce", produces = "application/json")
 	public Order reduceOrder(@RequestBody ReduceSnapshot snap) throws OrderNotFoundException {
-		book.reduce(new Reduce(ZonedDateTime.now(), "redId", snap.getOrderId(), new BigDecimal(snap.getSize())));
-		return book.getOrderById(snap.getOrderId());
+		book.reduce(new Reduce(ZonedDateTime.now(), "redId", snap.orderId(), new BigDecimal(snap.size())));
+		return book.getOrderById(snap.orderId());
 	}
 
 	@GetMapping(value = "/order/{id}")

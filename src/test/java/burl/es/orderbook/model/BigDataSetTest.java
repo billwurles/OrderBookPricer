@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class BigDataSetTest {
 
-
     OrderBookController controller = new OrderBookController();
 
 	/* Parses order strings in the format
@@ -30,9 +29,9 @@ public class BigDataSetTest {
     28812071 R f 157
  */
 
-    public static void main(String[] args) throws IOException, OrderNotFoundException {
+    public static void main(String[] args) {
 //        readOrdersFromFile();
-//        log.debug("getOrderById max execution time \t hash: {}ns \tbinary: {}ns",controller.maxHashTime ,controller.maxBubbleTime);
+//        log.debug("getOrderById max execution time \t hash: {}ns \t binary: {}ns",controller.maxHashTime ,controller.maxBubbleTime);
 
 //        insertOrderToBook("1400000 A a B 30 300");
 //        insertOrderToBook("1500000 A b B 31 30");

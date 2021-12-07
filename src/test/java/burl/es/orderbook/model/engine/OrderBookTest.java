@@ -337,7 +337,5 @@ class OrderBookTest {
         }
     }
 
-    /*TODO:
-    *  Test for ZonedDateTime stuff
-    *  Test reduces */
+    // TODO: Test for ZonedDateTime stuff
 }

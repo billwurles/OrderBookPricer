@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 @ComponentScan(basePackageClasses = OrderBookController.class)
 public class OrderBookApplication {
 
-	public static void main(String args[]){
+	public static void main(String[] args){
 		SpringApplication.run(OrderBookApplication.class, args);
 	}
 
