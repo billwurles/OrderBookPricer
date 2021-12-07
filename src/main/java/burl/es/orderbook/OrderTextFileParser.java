@@ -30,12 +30,7 @@ public class OrderTextFileParser {
 
     public static void main(String[] args) throws IOException, OrderParseException {
         readOrdersFromFile();
-//        addTestOrders();
 //        log.debug("getOrderById max execution time \t hash: {}ns \tbinary: {}ns",controller.maxHashTime ,controller.maxBubbleTime);
-//		try {
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
 
 //        insertOrderToBook("1400000 A a B 30 300");
 //        insertOrderToBook("1500000 A b B 31 30");
@@ -63,11 +58,11 @@ public class OrderTextFileParser {
         String[] parts = order.split(" ");
         switch (parts[1]){
             case "A":
-                log.debug("Adding order {}",order);
+//                log.debug("Adding order {}", order);
                 controller.addOrder(new OrderSnapshot(Long.parseLong(parts[0]), parts[2], parseOrderSide(parts[3]), parts[4], parts[5]));
                 break;
             case "R":
-                log.debug("Reducing order {}",order);
+//                log.debug("Reducing order {}", order);
                 controller.reduceOrder(new ReduceSnapshot(Long.parseLong(parts[0]), parts[2], parts[3]));
                 break;
         }

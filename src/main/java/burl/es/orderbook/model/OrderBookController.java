@@ -38,7 +38,7 @@ public class OrderBookController {
 	}
 
 	@GetMapping(path = "/orders", produces = "application/json")
-	public SortedSet<Order> getAllOrders(){
+	public ArrayList<Order> getAllOrders(){
 		return book.getOrders();
 	}
 
@@ -48,17 +48,17 @@ public class OrderBookController {
 	}
 
 	@GetMapping(path = "/filled", produces = "application/json")
-	public SortedSet<Order> getFilledOrders(){
+	public ArrayList<Order> getFilledOrders(){
 		return book.getFilledOrders();
 	}
 
 	@GetMapping(path = "/sells", produces = "application/json")
-	public SortedSet<Order> getAllSells(){
+	public ArrayList<Order> getAllSells(){
 		return book.getSellOrders();
 	}
 
 	@GetMapping(path = "/buys", produces = "application/json")
-	public SortedSet<Order> getAllBuys(){
+	public ArrayList<Order> getAllBuys(){
 		return book.getBuyOrders();
 	}
 

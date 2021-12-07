@@ -4,6 +4,7 @@ import burl.es.orderbook.model.exceptions.IllegalOrderException;
 import burl.es.orderbook.model.exceptions.OrderNotFoundException;
 import burl.es.orderbook.model.order.*;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -55,7 +56,7 @@ public class OrderBook {
 	}
 
 // Insertion to book execution time 	 map: 198ns / list: 130ns / set: 172ns
-	public Order addOrder(Order order){
+	public Order addOrder(@NonNull Order order){
 		orders.put(order.getOrderId(), order);
 		switch (order.getSide()){
 			case SELL -> orderBookSell.add(order);
@@ -64,7 +65,7 @@ public class OrderBook {
 		checkForFills();
 
 //		long startTime = System.nanoTime();
-
+//
 //		long endTime = System.nanoTime();
 //		long durationSet = (endTime - startTime);  //divide by 1000000 to get milliseconds.
 //
@@ -77,33 +78,34 @@ public class OrderBook {
 //		orders.add(order);
 //		endTime = System.nanoTime();
 //		long durationList = (endTime - startTime);  //divide by 1000000 to get milliseconds.
-
+//
 //		log.debug("Insertion to book execution time \t map: {}ns \tlist: {}ns\t set: {}ns",durationMap,durationList,durationSet);
-		log.info("Inserting {}\t '{}'\t for {} shares @ {} - {}",order.getSide(),order.getOrderId(),order.getSize(),order.getPrice(),order.getTimestamp());
+//		log.info("Inserting {}\t '{}'\t for {} shares @ {} - {}",order.getSide(),order.getOrderId(),order.getSize(),order.getPrice(),order.getTimestamp());
 //		checkForFills();
-		return order.copy();
+		return order.clone();
 	}
 
-	public Order reduce(Reduce reduce) throws OrderNotFoundException {
-		log.info("Inserting REDUCE\t '{}'\t for order '{}' shares @ {} - {}",reduce.reduceId, reduce.getOrderId(),reduce.getSize(),reduce.getTimestamp());
-		Order order = getOrderById(reduce.getOrderId());
+	public Order reduce(@NonNull Reduce reduce) throws OrderNotFoundException {
+		log.info("Inserting REDUCE\t '{}'\t for order '{}' shares @ {} - {}",reduce.getOrderId(), reduce.orderToReduce, reduce.getSize(),  reduce.getTimestamp());
+		Order order = getOrderById(reduce.orderToReduce);
 		try {
-			reduce.fill(order);
+			reduce.reduce(order);
 		}  catch (IllegalOrderException e){
 			log.error("Can't reduce that order, probs already filled");
 		}
 		removeIfFullyFilled(order);
-		return order.copy();
+		return order.clone();
 	}
 
 	public String checkForFills() { //TODO: run this on separate thread to insertions
-		boolean checkedSells, checkedBuys;
 		SortedSet<Order> sellBook = orderBookSell;//, buyBook;
 //		SortedSet<Order> sellBook = orderBookSell.headSet(orderBookBuy.first()), buyBook;
+		boolean checkedSells;
 		do {
 			checkedSells = true;
 			sell:
 			for(Order sell : sellBook) {
+				boolean checkedBuys;
 				do {
 					SortedSet<Order> buyBook = orderBookBuy.headSet(sell, true); //Next sell will be more expensive so we do not need lower buys
 					checkedBuys = true;
@@ -117,8 +119,8 @@ public class OrderBook {
 						if(removeIfFullyFilled(buy)){
 							checkedBuys = false;
 						}
-						if(!checkedSells) break sell;
-						if(!checkedBuys) break buy;
+						if(!checkedSells) break sell; // Need to break and restart do-while to prevent concurrentModification
+						if(!checkedBuys)  break buy;  //TODO: Check time complexity of break+do-while vs a list of filled orders which is removed at the end
 					}
 				} while (!checkedBuys);
 			}
@@ -126,7 +128,7 @@ public class OrderBook {
 		return ""; //TODO: Implement some kind of return string, or not
 	}
 
-	private boolean removeIfFullyFilled(Order order){
+	private boolean removeIfFullyFilled(@NonNull Order order){
 		if (order.isFilled()) {
 			switch (order.getSide()){
 				case SELL -> orderBookSell.remove(order);
@@ -139,18 +141,18 @@ public class OrderBook {
 		return false;
 	}
 
-	public SortedSet<Order> getOrders() {
-		SortedSet<Order> orders = filledOrders.tailSet(filledOrders.first());
-		orders.addAll(orderBookSell);
-		orders.addAll(orderBookBuy);
-		return orders;
+	public ArrayList<Order> getOrders() {
+//		SortedSet<Order> orders = filledOrders.tailSet(filledOrders.first());
+//		orders.addAll(orderBookSell);
+//		orders.addAll(orderBookBuy);
+		return new ArrayList<>(orders.values());
 	}
 
 	/*Total time spent getting order by ID per algorithm:
 			hash: 23457ns
 			binary search: 4699574ns
 	//Max individual times: */
-	public Order getOrderById(String orderId) throws OrderNotFoundException {
+	public Order getOrderById(@NonNull String orderId) throws OrderNotFoundException {
 		Order order = orders.get(orderId);
 		if(order == null) throw new OrderNotFoundException(orderId);
 		return order;
@@ -174,8 +176,8 @@ public class OrderBook {
 //		return return getOrderByReduce(new Reduce(ZonedDateTime.now(), "", id, BigDecimal.ZERO)); //TODO: need an id generator
 //	}
 
-	public SortedSet<Order> getFilledOrders() {
-		return filledOrders;
+	public ArrayList<Order> getFilledOrders() {
+		return new ArrayList<>(filledOrders);
 	}
 
 	public ArrayList<Order> getOpenOrders() {
@@ -185,11 +187,11 @@ public class OrderBook {
 		return list;
 	}
 
-	public SortedSet<Order> getSellOrders() {
-		return orderBookSell; //TODO: make all these return immutable versions
+	public ArrayList<Order> getSellOrders() {
+		return new ArrayList<>(orderBookSell); //TODO: make all these return immutable versions
 	}
 
-	public SortedSet<Order> getBuyOrders() {
-		return orderBookBuy;
+	public ArrayList<Order> getBuyOrders() {
+		return new ArrayList<>(orderBookBuy);
 	}
 }
